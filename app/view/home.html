@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>答题首页</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+
+                <div style="margin: 40px 0 0;text-align: right;">
+                    <a href="/homelist">提交列表</a>
+                </div>
+
+                <form style="margin: 20px 0 0 0;">
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">姓名：</label>
+                        <input type="text" name="names" class="form-control" id="exampleInputEmail1" placeholder="姓名：">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">职位：</label>
+                        <input type="text" name="position" class="form-control" id="exampleInputPassword1"
+                            placeholder="职位：">
+                    </div>
+
+                    <div>
+                        {% for item in list %}
+                        <div class="jumbotron">
+                            <h4>{{item.subject}}</h4>
+
+                            {% for items in item.subjectArray %}
+
+                            <label class="radio-inline">
+                                <input type="radio" name="{{items.id}}" value="{{item.subject}}--{{items.Answer}}">
+                                {{items.Answer}}
+                            </label>
+
+                            {% endfor %}
+
+                        </div>
+                        {% endfor %}
+
+                    </div>
+
+                    <input type="botton" class="btn btn-default sub" style="margin: 20px auto 30px;display: block;"
+                        value="提交">
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+    <script>
+
+        function yymm() {
+            var date = new Date();
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+            D = date.getDate() + ' ';
+            h = date.getHours() + ':';
+            m = date.getMinutes() + ':';
+            s = date.getSeconds();
+            return Y + M + D + h + m + s;
+        }
+
+        $('.sub').click(function () {
+            var datajson = {};
+            var dataarr = [];
+            var formdata = $('form').serializeArray();
+            $.each(formdata, function (index, item) {
+                if (item.name != 'names' && item.name != 'position' && item.name != '_csrf') {
+                    dataarr.push(item.value);
+                } else {
+                    datajson[item.name] = item.value;
+                }
+
+            });
+
+
+            console.log(dataarr)
+
+            $.ajax({
+                url: '/submit',
+                type: 'post',
+                headers: {
+                    'x-csrf-token': datajson._csrf
+                },
+                // 设置的是请求参数
+                data: {
+                    names: datajson.names,
+                    position: datajson.position,
+                    answerArr: dataarr,
+                    time_data: yymm(),
+                },
+                // 用于设置响应体的类型 注意 跟 data 参数没关系！！！
+                dataType: 'json',
+                success: function (res) {
+                    // 一旦设置的 dataType 选项，就不再关心 服务端 响应的 Content-Type 了
+                    // 客户端会主观认为服务端返回的就是 JSON 格式的字符串
+                    console.log(res)
+
+                    alert(res.msg)
+
+                }
+            })
+
+
+
+
+
+        })
+
+    </script>
+</body>
+
+</html>
